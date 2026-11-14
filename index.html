@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#0b101b" />
+  <meta name="description" content="Live Metric pool intelligence, risk changes, and market launch preflight." />
+  <title>Metric Atlas — Live Pool Intelligence</title>
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <a class="brand" href="#overview" aria-label="Metric Atlas home"><span class="brand-icon">◇</span><span><strong>METRIC</strong><small>ATLAS</small></span></a>
+      <nav aria-label="Primary"><button class="nav active" data-view="overview">Overview</button><button class="nav" data-view="sentinel">Sentinel</button><button class="nav" data-view="market">Market OS</button></nav>
+      <div class="live" aria-label="Live data status"><span class="pulse"></span><span id="liveLabel">LIVE</span></div>
+    </header>
+    <main>
+      <section class="hero">
+        <div><h1>Operate with<br><em>better information.</em></h1><p>Monitor the safeguards behind active liquidity. Test a market configuration before capital goes live.</p></div>
+        <div class="guide-dock">
+          <div class="mascot-stage" aria-label="Live market snapshots">
+            <div class="mascot-orbit" aria-hidden="true"></div>
+            <button id="guideRobot" class="guide-robot-button" type="button" aria-label="Open site guide" aria-controls="guidePanel" aria-expanded="false">
+              <span class="mascot-body"><img class="mascot-base" src="./mascot-base.webp" alt="" width="677" height="720"><img class="mascot-arm-left" src="./mascot-arm-left.webp" alt="" width="677" height="720"><img class="mascot-arm-right" src="./mascot-arm-right.webp" alt="" width="677" height="720"><span class="mascot-blink" aria-hidden="true"></span><span class="mascot-glint"></span></span>
+              <span class="guide-dock-label">DO YOU NEED HELP? <span>↗</span></span>
+            </button>
+            <div class="mascot-nodes" aria-label="Live market stats">
+              <button class="mascot-node node-pools" type="button" data-mascot-stat="pools" aria-label="Show listed pools"><span aria-hidden="true">◈</span></button>
+              <button class="mascot-node node-tvl" type="button" data-mascot-stat="tvl" aria-label="Show reported TVL"><span aria-hidden="true">◎</span></button>
+              <button class="mascot-node node-volume" type="button" data-mascot-stat="volume" aria-label="Show 24 hour volume"><span aria-hidden="true">▥</span></button>
+            </div>
+            <div class="mascot-stat" id="mascotStat" aria-live="off"><span id="mascotStatLabel">LISTED POOLS</span><strong id="mascotStatValue">Loading…</strong><small id="mascotStatFreshness">CONNECTING TO LIVE DATA</small></div>
+          </div>
+          <aside id="guidePanel" class="guide-panel" role="dialog" aria-label="Site guide" hidden>
+            <div class="guide-header"><div><span class="kicker">METRIC ATLAS</span><h2>How can I help?</h2></div><button id="guideClose" type="button" aria-label="Close guide">×</button></div>
+            <p class="guide-intro">Choose a feature to see what it does and how to use it.</p>
+            <div id="guideContent" aria-live="polite"></div>
+          </aside>
+        </div>
+      </section>
+      <div id="error" class="error" hidden></div>
+      <section id="overview" class="view active-view">
+        <div class="section-title"><div><span class="kicker">THE NETWORK</span><h2>Metric at a glance</h2></div><button id="refresh" class="outline">↻ Refresh now</button></div>
+        <div class="metrics"><article class="metric"><span>LISTED POOLS</span><strong id="mPools">—</strong><small>All indexed pools, including excluded</small></article><article class="metric"><span>REPORTED TVL</span><strong id="mTvl">—</strong><small>Sum where USD value is available</small></article><article class="metric"><span>24H VOLUME</span><strong id="mVolume">—</strong><small>Sum where USD volume is available</small></article><article class="metric"><span>24H SWAPS</span><strong id="mSwaps">—</strong><small>All indexed pools</small></article></div>
+        <div class="section-title split"><div><span class="kicker">MARKET MAP</span><h2>All indexed pools</h2><p>New launches, established markets, and pools removed from Metric Pools.</p></div><div class="filters"><input id="poolSearch" type="search" placeholder="Search pair or address" aria-label="Search pools" /><select id="sortPools" aria-label="Sort pools"><option value="newest">Newest first</option><option value="oldest">Oldest first</option><option value="tvl">Highest TVL</option><option value="volume">Highest 24H volume</option><option value="markout">Highest 7D markout APR</option></select><select id="chainFilter" aria-label="Filter chain"><option value="all">All chains</option><option value="ethereum">Ethereum</option><option value="BSC">BNB Chain</option><option value="Robinhood">Robinhood Chain</option></select><select id="tierFilter" aria-label="Filter tier"><option value="all">All risk tiers</option><option value="green">Green</option><option value="yellow">Yellow</option><option value="red">Red</option><option value="black">Removed from Metric Pools</option><option value="unknown">Unclassified</option></select></div></div>
+        <p class="table-scroll-hint">Swipe the table to see pool status and actions →</p><div class="table-wrap"><table><thead><tr><th>POOL / CHAIN</th><th>TVL</th><th>24H VOLUME</th><th>MARKOUT APR · 7D</th><th>TIER</th><th></th></tr></thead><tbody id="poolRows"><tr><td colspan="6" class="empty">Loading live pools…</td></tr></tbody></table></div>
+        <div class="pager"><span id="poolCount">Loading pool universe…</span><div><button id="prevPage" class="outline">← Previous</button><span id="pageLabel">—</span><button id="nextPage" class="outline">Next →</button></div></div>
+        <p class="footnote">Fetched from all pages of Metric's public metadata API, including its excluded-pool list. Values can be unavailable for some pools; sums are of reported values, not audited protocol totals. Markout APR is historical and is not total LP return. Pool tiers describe safeguards and permissions, not profitability. <a href="https://docs.metric.xyz/use-metric/provide-and-manage-liquidity/understanding-your-returns" target="_blank" rel="noopener">Metric methodology ↗</a></p>
+      </section>
+      <section id="sentinel" class="view">
+        <div class="section-title"><div><span class="kicker">POOL SURVEILLANCE</span><h2>Sentinel</h2><p>Watch an address and see exactly what changed since your last visit.</p></div></div>
+        <div class="watch-input"><input id="watchAddress" placeholder="Paste a Metric pool address · 0x…" aria-label="Pool address" spellcheck="false" /><select id="watchChain" aria-label="Pool chain"><option value="all">Find across chains</option><option value="1">Ethereum</option><option value="56">BNB Chain</option><option value="4663">Robinhood Chain</option></select><button id="addWatch" class="primary">Watch pool →</button></div>
+        <div id="watchMessage" class="hint">Watched pools are saved in this browser. Snapshots compare each successful refresh; no wallet connection is required.</div>
+        <div id="watchCards" class="watch-grid"><div class="empty-card">No watched pools yet. Select a pool from the Overview or paste its address above.</div></div>
+        <div class="section-title split"><div><span class="kicker">CHANGE LOG</span><h2>Observed changes</h2></div><button id="clearHistory" class="text-button">Clear local history</button></div><div id="changeLog" class="log"><div class="empty-card">No changes observed yet.</div></div>
+        <p class="footnote">Sentinel detects differences between snapshots collected while this site is open. It is not an always-on alerting service or an independent onchain audit. Verify consequential changes onchain before acting.</p>
+      </section>
+      <section id="market" class="view">
+        <div class="section-title"><div><span class="kicker">MARKET DESIGN</span><h2>Market OS</h2><p>A preflight workbench for curators building on Metric.</p></div><a class="outline link-button" href="https://docs.metric.xyz/run-a-pool/getting-started" target="_blank" rel="noopener">Operator docs ↗</a></div>
+        <div class="market-grid"><div class="panel"><div class="panel-head"><span>01 / CONFIGURE</span><strong>Proposed market</strong></div><label>Market pair<input id="pair" value="TOKEN / USDC" /></label><div class="two"><label>Chain<select id="marketChain"><option value="ethereum">Ethereum</option><option value="BSC">BNB Chain</option><option value="Robinhood">Robinhood Chain</option></select></label><label>Pricing model<select id="pricing"><option value="anchored">Anchored oracle</option><option value="custom">Custom price provider</option></select></label></div><div class="two"><label>Initial liquidity · USD<input id="liquidity" type="number" min="0" value="25000" /></label><label>Target half-spread · bps<input id="spread" type="number" min="0" max="10000" value="20" /></label></div><div class="two"><label>Staleness limit · sec<input id="freshness" type="number" min="0" value="15" /></label><label>Max bin width · %<input id="binWidth" type="number" min="0" step="0.1" value="1" /></label></div><div class="two"><label>StopLoss drawdown · %<input id="stopLoss" type="number" min="0" max="100" step="0.1" value="15" /></label><label>Price shock · %<input id="shock" type="number" min="0" step="0.1" value="5" /></label></div><label class="check"><input id="immutable" type="checkbox" checked /> Price Provider and StopLoss settings immutable</label><label class="check"><input id="withdrawal" type="checkbox" /> Withdrawal extension enabled</label><button id="runPreflight" class="primary full">Run preflight →</button></div>
+          <div class="panel result"><div class="panel-head"><span>02 / EVALUATE</span><strong>Readiness report</strong></div><div id="readiness" class="readiness"><span class="score">—</span><div><strong>Configure a market</strong><small>Checks use Metric's documented public-pool criteria.</small></div></div><div id="checks" class="checks"></div><div class="scenario"><span>ILLUSTRATIVE STALE-QUOTE EXPOSURE</span><strong id="shockResult">—</strong><small id="shockExplain">A stress illustration, not a forecast or an exact Metric swap simulation.</small></div><div class="panel-footer"><a href="https://docs.metric.xyz/use-metric/pool-tiers" target="_blank" rel="noopener">Pool tier rules ↗</a><a href="https://docs.metric.xyz/run-a-pool/routing-quality" target="_blank" rel="noopener">Routing standards ↗</a></div></div></div>
+        <div class="operator-strip"><span>03 / OPERATE</span><p>Before launch, test quotes, swaps and withdrawals. In production, monitor feed health, reverts, slippage, inventory and markout.</p><a href="https://docs.metric.xyz/run-a-pool/price-updates-and-monitoring" target="_blank" rel="noopener">Read operating guide ↗</a></div>
+      </section>
+    </main>
+    <dialog id="poolDialog" class="pool-dialog"><div class="dialog-head"><div><span class="kicker">POOL INTELLIGENCE</span><h2 id="dialogTitle">Pool details</h2></div><button id="closeDialog" aria-label="Close pool details">×</button></div><div id="dialogBody"></div></dialog>
+    <footer><div><strong>METRIC ATLAS</strong><span>Independent community prototype · Read-only · No wallet connection</span></div><div><a href="https://docs.metric.xyz/" target="_blank" rel="noopener">Docs ↗</a><a href="https://app.metric.xyz/" target="_blank" rel="noopener">Metric app ↗</a><a href="https://github.com/Metricxyz" target="_blank" rel="noopener">Contracts ↗</a></div></footer>
+  </div>
+  <script src="./app.js" defer></script>
+  <script src="./guide.js" defer></script>
+  <script src="./mascot.js" defer></script>
+</body>
+</html>
