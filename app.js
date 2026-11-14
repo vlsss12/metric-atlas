@@ -67,7 +67,7 @@ async function refresh() {
     $('liveLabel').textContent='LIVE';
     document.querySelector('.live').title='Last updated '+state.lastUpdate.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit',second:'2-digit'});
     render();
-    window.dispatchEvent(new CustomEvent('metric:pools-updated',{detail:{pools:state.pools,updatedAt:state.lastUpdate.toISOString()}}));
+    window.dispatchEvent(new CustomEvent('metric:pools-updated',{detail:{pools:state.pools,excludedKeys:[...new Set(excluded.map(key))],updatedAt:state.lastUpdate.toISOString()}}));
   } catch(e) { document.querySelector('.live').dataset.status='error'; $('liveLabel').textContent='OFFLINE'; document.querySelector('.live').title='Live data unavailable'; $('error').hidden=false; $('error').textContent='Live data unavailable: '+e.message+'. '+(state.lastUpdate?'Showing the last successful data from '+state.lastUpdate.toLocaleTimeString()+'. ':'')+'The next automatic retry is in one minute.'; if(!state.lastUpdate){$('poolRows').innerHTML='<tr><td colspan="6" class="empty">Pool data is unavailable. Retrying in one minute.</td></tr>';$('poolCount').textContent='Pool list unavailable';} window.dispatchEvent(new Event('metric:stats-error')); window.dispatchEvent(new CustomEvent('metric:pools-error',{detail:{message:e.message}})); }
   finally {state.busy=false;}
 }

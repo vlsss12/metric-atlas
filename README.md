@@ -10,7 +10,7 @@ Metric Atlas is an independent, read-only community project. It brings four work
 | --- | --- |
 | **Overview** | Explores all pools returned by Metric's paginated public metadata API, including the separate excluded-pool list. Shows reported TVL, 24-hour volume and swaps, pool status, and detailed metadata. |
 | **Sentinel** | Watches selected pools in the browser and records differences between successful refresh snapshots, including tier, admin, price provider, safeguards, pause state, and fee shares. |
-| **Mission Control** | Tracks reported provider issues, paused pools, and removals from Metric's public pool listing. Each observation includes evidence, timestamps, a next step, and a local acknowledgement control. |
+| **Mission Control** | Tracks reported provider issues, paused pools, and removals returned by Metric's separate excluded-pool query. Each observation includes evidence, timestamps, a next step, and a local acknowledgement control. |
 | **Market OS** | Checks a proposed pool configuration against six documented baseline conditions and illustrates a stale-quote price-shock scenario. |
 
 ## What you can do

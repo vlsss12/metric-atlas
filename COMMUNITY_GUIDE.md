@@ -36,7 +36,7 @@ The history starts when you add a watch. It is stored locally in the current bro
 
 ## 3. Investigate conditions in Mission Control
 
-Open **Mission Control** for an evidence feed across pools returned by a complete Metric API refresh. It currently identifies three reported conditions: a non-healthy Price Provider status, a positive `pauseLevel`, and a pool in Metric's separate excluded-pool list. The cards show the pool, chain, first and last observation time, source field, raw value, and a suggested verification step.
+Open **Mission Control** for an evidence feed across pools returned by a complete Metric API refresh. It currently identifies three reported conditions: a non-healthy Price Provider status, a positive `pauseLevel` (or `pool_paused` when the level is unavailable), and a pool in Metric's separate excluded-pool list. The cards show the pool, chain, first and last observation time, source evidence, raw value, and a suggested verification step.
 
 Search by pair or address and filter active, resolved, provider, pause, or removed observations. **Acknowledge locally** changes the card only in your browser; it does not notify Metric or a curator. A condition is marked resolved only when that pool returns in a later successful refresh without that condition. If the pool disappears from the response, its status stays unconfirmed.
 
