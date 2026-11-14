@@ -1,15 +1,16 @@
 # Metric Atlas
 
-**Live pool intelligence, local change monitoring, and market design preflight for the Metric community.**
+**Live pool intelligence, evidence-based condition monitoring, and market design preflight for the Metric community.**
 
 [Open the live site](https://metric-atlas-xyz.vercel.app/) · [Read the community guide](COMMUNITY_GUIDE.md) · [Download the team brief (PDF)](docs/Metric-Atlas-Team-Brief.pdf) · [View the community post on X](https://x.com/vlsss12/status/2121527705283826013)
 
-Metric Atlas is an independent, read-only community project. It brings three workflows into one interface:
+Metric Atlas is an independent, read-only community project. It brings four workflows into one interface:
 
 | Workflow | What it does |
 | --- | --- |
 | **Overview** | Explores all pools returned by Metric's paginated public metadata API, including the separate excluded-pool list. Shows reported TVL, 24-hour volume and swaps, pool status, and detailed metadata. |
 | **Sentinel** | Watches selected pools in the browser and records differences between successful refresh snapshots, including tier, admin, price provider, safeguards, pause state, and fee shares. |
+| **Mission Control** | Tracks reported provider issues, paused pools, and removals from Metric's public pool listing. Each observation includes evidence, timestamps, a next step, and a local acknowledgement control. |
 | **Market OS** | Checks a proposed pool configuration against six documented baseline conditions and illustrates a stale-quote price-shock scenario. |
 
 ## What you can do
@@ -18,6 +19,7 @@ Metric Atlas is an independent, read-only community project. It brings three wor
 - **Inspect a pool.** Open details for addresses, creation time, reported volume, pricing and StopLoss settings, provider status, fee shares, and the full public API record.
 - **Distinguish excluded pools.** A pool returned by Metric's separate `blacklistedOnly` query is labeled **Removed from Metric Pools**. This refers to the public listing, not deletion of its onchain contract.
 - **Monitor selected pools.** Add a watch from Overview or paste a pool address in Sentinel. Compare current metadata with the last successfully collected snapshot and review the local change log.
+- **Investigate pool conditions.** Mission Control derives signals from successful full-universe API refreshes, supports search and filters, and records when a reported condition is later resolved. A pool absent from a later response remains unconfirmed rather than being marked resolved.
 - **Refresh live data.** The open page requests fresh API data every 60 seconds, refreshes a stale tab when it becomes visible, and offers a manual refresh button. The header status reflects loading, success, or an error.
 - **Assess a market design.** Enter a pair, chain, pricing model, liquidity, half-spread, quote staleness, bin width, StopLoss drawdown, and price shock. Market OS reports six preflight checks and an illustrative stale-quote exposure.
 - **Get guided help.** An animated robot opens a topic-based guide for the site's features. Its orbiting indicators cycle through live pool count, reported TVL, and 24-hour volume. Motion respects reduced-motion preferences.
@@ -25,7 +27,8 @@ Metric Atlas is an independent, read-only community project. It brings three wor
 ## Important boundaries
 
 - The site reads Metric's **public API** directly. It does not connect a wallet, request an API key, execute trades, create pools, or move funds.
-- Watch lists, snapshots, and change history are stored in **your browser**. Monitoring stops when the page is closed; history does not sync between devices and does not reconstruct earlier events.
+- Watch lists, snapshots, change history, and Mission Control observations are stored in **your browser**. Monitoring stops when the page is closed; history does not sync between devices and does not reconstruct earlier events. Acknowledgements are local to that browser.
+- Mission Control reads reported metadata fields; it does not directly measure price-feed freshness, provide 24/7 alerting, or notify curators. An API failure preserves the previous observation and is shown as a failed check.
 - A watched address missing from both API lists is shown as **unconfirmed** rather than assumed removed.
 - Aggregate cards sum available values returned by the API. They are not independently audited protocol totals. Some pool metrics may be unavailable.
 - Markout is historical and is not a prediction of LP returns. A risk tier describes reported safeguards and permissions, not profitability.
@@ -45,14 +48,15 @@ Open [http://localhost:8765](http://localhost:8765). A network connection is nee
 
 | File | Purpose |
 | --- | --- |
-| `index.html` | Accessible interface and three main views |
+| `index.html` | Accessible interface and four main views |
 | `styles.css` | Responsive dark and gold design, glass panels, motion, and reduced-motion support |
 | `app.js` | API pagination, rendering, watch snapshots, and Market OS checks |
+| `mission.js` | Evidence-based pool condition detection, reconciliation, and local history |
 | `guide.js` | Topic-based product guide |
 | `mascot.js` | Animated guide and live stat interactions |
 | `mascot-*.webp` | Original guide character assets |
 | [`COMMUNITY_GUIDE.md`](COMMUNITY_GUIDE.md) | Step-by-step guide for visitors and contributors |
-| [`docs/Metric-Atlas-Team-Brief.pdf`](docs/Metric-Atlas-Team-Brief.pdf) | Five-page visual brief for the Metric team |
+| [`docs/Metric-Atlas-Team-Brief.pdf`](docs/Metric-Atlas-Team-Brief.pdf) | Visual brief for the Metric team |
 
 ## Sources and attribution
 

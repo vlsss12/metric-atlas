@@ -67,7 +67,8 @@ async function refresh() {
     $('liveLabel').textContent='LIVE';
     document.querySelector('.live').title='Last updated '+state.lastUpdate.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit',second:'2-digit'});
     render();
-  } catch(e) { document.querySelector('.live').dataset.status='error'; $('liveLabel').textContent='OFFLINE'; document.querySelector('.live').title='Live data unavailable'; $('error').hidden=false; $('error').textContent='Live data unavailable: '+e.message+'. '+(state.lastUpdate?'Showing the last successful data from '+state.lastUpdate.toLocaleTimeString()+'. ':'')+'The next automatic retry is in one minute.'; if(!state.lastUpdate){$('poolRows').innerHTML='<tr><td colspan="6" class="empty">Pool data is unavailable. Retrying in one minute.</td></tr>';$('poolCount').textContent='Pool list unavailable';} window.dispatchEvent(new Event('metric:stats-error')); }
+    window.dispatchEvent(new CustomEvent('metric:pools-updated',{detail:{pools:state.pools,updatedAt:state.lastUpdate.toISOString()}}));
+  } catch(e) { document.querySelector('.live').dataset.status='error'; $('liveLabel').textContent='OFFLINE'; document.querySelector('.live').title='Live data unavailable'; $('error').hidden=false; $('error').textContent='Live data unavailable: '+e.message+'. '+(state.lastUpdate?'Showing the last successful data from '+state.lastUpdate.toLocaleTimeString()+'. ':'')+'The next automatic retry is in one minute.'; if(!state.lastUpdate){$('poolRows').innerHTML='<tr><td colspan="6" class="empty">Pool data is unavailable. Retrying in one minute.</td></tr>';$('poolCount').textContent='Pool list unavailable';} window.dispatchEvent(new Event('metric:stats-error')); window.dispatchEvent(new CustomEvent('metric:pools-error',{detail:{message:e.message}})); }
   finally {state.busy=false;}
 }
 function renderOverview(){
@@ -106,7 +107,7 @@ function renderWatches(){
 function render(){renderOverview();renderWatches();}
 function addWatchPool(p){const w={id:key(p),chainId:chainId(p),address:p.poolAddress};if(!state.watches.some(x=>x.id===w.id))state.watches.push(w);save(WATCH_KEY,state.watches);state.watchPools=state.pools.filter(pool=>state.watches.some(watch=>watch.id===key(pool)));compare(p);updateSnapshotStorage();$('watchMessage').textContent='Watching '+p.pair+' on '+p.chain+'.';setView('sentinel');renderWatches();}
 async function addWatchAddress(){const address=$('watchAddress').value.trim();if(!/^0x[a-fA-F0-9]{40}$/.test(address)){$('watchMessage').textContent='Enter a valid 0x pool address (40 hexadecimal characters).';return;}if(!state.lastUpdate){$('watchMessage').textContent='The live pool list is still loading. Try again after it appears.';return;}const cid=$('watchChain').value;const p=state.pools.find(p=>p.poolAddress.toLowerCase()===address.toLowerCase()&&(cid==='all'||chainId(p)===+cid));if(p){$('watchAddress').value='';addWatchPool(p);return;}$('watchMessage').textContent='Pool not found in the current API pool universe. Refresh and try again.';}
-function setView(name,push=true){if(!['overview','sentinel','market'].includes(name))return;document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active-view',v.id===name));document.querySelectorAll('.nav').forEach(b=>b.classList.toggle('active',b.dataset.view===name));if(push&&location.hash!=='#'+name)history.pushState({},'','#'+name);window.scrollTo({top:0,behavior:'smooth'});}
+function setView(name,push=true){if(!['overview','sentinel','mission','market'].includes(name))return;document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active-view',v.id===name));document.querySelectorAll('.nav').forEach(b=>b.classList.toggle('active',b.dataset.view===name));if(push&&location.hash!=='#'+name)history.pushState({},'','#'+name);window.scrollTo({top:0,behavior:'smooth'});}
 function val(id){const el=$(id),n=Number(el.value);if(!Number.isFinite(n))return 0;const min=el.min===''?-Infinity:Number(el.min),max=el.max===''?Infinity:Number(el.max);return Math.min(max,Math.max(min,n));}
 function preflight(){
   const liquidity=val('liquidity'),spread=val('spread'),fresh=val('freshness'),bin=val('binWidth'),stop=val('stopLoss'),shock=val('shock'),anchored=$('pricing').value==='anchored',immutable=$('immutable').checked,withdrawal=$('withdrawal').checked;
@@ -144,5 +145,5 @@ $('clearHistory').addEventListener('click',()=>{state.changes=[];save(LOG_KEY,[]
 $('runPreflight').addEventListener('click',preflight);
 document.querySelectorAll('#market input,#market select').forEach(el=>el.addEventListener('change',preflight));
 document.querySelectorAll('#market input[type="number"],#market input[type="text"]').forEach(el=>el.addEventListener('input',preflight));
-setView(['overview','sentinel','market'].includes(location.hash.slice(1))?location.hash.slice(1):'overview',false);
+setView(['overview','sentinel','mission','market'].includes(location.hash.slice(1))?location.hash.slice(1):'overview',false);
 preflight();refresh();setInterval(refresh,REFRESH_MS);document.addEventListener('visibilitychange',()=>{if(!document.hidden&&(!state.lastUpdate||Date.now()-state.lastUpdate>REFRESH_MS))refresh();});
