@@ -231,3 +231,8 @@ th,td{padding:14px 16px}.panel-head strong{font-size:14px}
 @media(max-width:900px){.mission-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.mission-feed{grid-template-columns:1fr}.mission-disclosure,.mission-method{grid-template-columns:1fr}}
 @media(max-width:640px){.mission-heading{align-items:start}.mission-mode{margin:6px 0}.mission-controls{width:100%}.mission-controls label,.mission-controls input,.mission-controls select{width:100%;max-width:none}.mission-metrics{gap:8px}.mission-metrics article{padding:14px}.mission-metrics strong{font-size:22px}}
 @media(prefers-reduced-motion:reduce){.mission-mode-dot{animation:none}}
+
+/* Quiet, continuous rotation for the Atlas mark. */
+.brand-icon{display:inline-block;transform-origin:50% 50%;animation:atlas-mark-turn 18s linear infinite}
+@keyframes atlas-mark-turn{from{transform:rotate(18deg)}to{transform:rotate(378deg)}}
+@media(prefers-reduced-motion:reduce){.brand-icon{animation:none;transform:rotate(18deg)}}
