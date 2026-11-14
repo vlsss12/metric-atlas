@@ -71,9 +71,11 @@
 
   function render() {
     const active = Object.values(observations).filter(item => item.status === 'active');
+    const currentKeys = new Set(currentPools.map(poolKey));
+    const confirmedActive = active.filter(item => currentKeys.has(item.poolKey));
     $m('missionChecked').textContent = lastCheck ? new Intl.NumberFormat('en-US').format(currentPools.length) : '—';
-    $m('missionProvider').textContent = lastCheck ? new Intl.NumberFormat('en-US').format(active.filter(item => item.type === 'provider').length) : '—';
-    $m('missionPaused').textContent = lastCheck ? new Intl.NumberFormat('en-US').format(active.filter(item => item.type === 'paused').length) : '—';
+    $m('missionProvider').textContent = lastCheck ? new Intl.NumberFormat('en-US').format(confirmedActive.filter(item => item.type === 'provider').length) : '—';
+    $m('missionPaused').textContent = lastCheck ? new Intl.NumberFormat('en-US').format(confirmedActive.filter(item => item.type === 'paused').length) : '—';
     $m('missionUpdated').textContent = lastCheck ? new Date(lastCheck).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) : '—';
     const mode = $m('mission').querySelector('.mission-mode');
     mode.dataset.state = refreshError ? 'error' : lastCheck ? 'live' : 'loading';
@@ -96,7 +98,7 @@
     $m('missionCount').textContent = `${items.length.toLocaleString()} ${items.length === 1 ? 'observation' : 'observations'}${lastCheck ? ' · Last successful check ' + date(lastCheck) : ' · Previous browser observations'}`;
     const slice = items.slice((page - 1) * PAGE_SIZE,page * PAGE_SIZE);
     $m('missionFeed').innerHTML = slice.length ? slice.map(item => {
-      const missing = lastCheck && item.status === 'active' && !currentPools.some(pool => poolKey(pool) === item.poolKey);
+      const missing = lastCheck && item.status === 'active' && !currentKeys.has(item.poolKey);
       const status = item.status === 'resolved' ? 'Resolved on later check' : !lastCheck ? 'Previous browser observation' : missing ? 'Not returned in latest response' : item.acknowledged ? 'Acknowledged in this browser' : 'Observed condition';
       return `<article class="mission-card ${safe(item.severity)} ${safe(item.status)}"><div class="mission-card-main"><div class="mission-card-top"><span class="mission-severity">${safe(item.severity.toUpperCase())}</span><span class="mission-card-status">${safe(status)}</span></div><h3>${safe(item.title)}</h3><p>${safe(item.summary)}</p><div class="mission-pool"><strong>${safe(item.pair)}</strong><span>${safe(item.chain)} · ${safe(shortAddress(item.address))}</span></div><div class="mission-times"><span>FIRST OBSERVED <b>${safe(date(item.firstSeen))}</b></span><span>LAST CHECKED <b>${safe(date(item.lastSeen))}</b></span></div></div><details><summary>Evidence and next step</summary><div class="mission-evidence"><p><b>Source field</b><code>${safe(item.field)} = ${safe(item.value)}</code></p><p><b>Next step</b>${safe(item.nextStep)}</p><p><b>Data source</b><a href="${SOURCE}" target="_blank" rel="noopener noreferrer">Metric public metadata ↗</a>${item.explorer ? ` · <a href="${safe(item.explorer)}" target="_blank" rel="noopener noreferrer">Pool contract ↗</a>` : ''}</p><small>Observed from a successful API refresh. This record is stored only in this browser.</small></div></details><div class="mission-card-actions">${item.status === 'active' ? `<button type="button" data-mission-ack="${safe(item.id)}">${item.acknowledged ? 'Undo local acknowledgement' : 'Acknowledge locally'}</button>` : `<span>Resolved ${safe(date(item.resolvedAt))}</span>`}</div></article>`;
     }).join('') : `<div class="empty-card">${lastCheck ? 'No conditions match this view. Try another filter or search.' : 'Waiting for a complete Metric API refresh. Previous browser observations will appear here when available.'}</div>`;
