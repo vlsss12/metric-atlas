@@ -42,7 +42,15 @@ Search by pair or address and filter active, resolved, provider, pause, or remov
 
 The feed is active while this page is open. It is not a 24/7 alert service, does not independently test an oracle or price-feed freshness, and does not claim that an unknown provider status is healthy. For a consequential decision, confirm the latest state with Metric and onchain.
 
-## 4. Test an idea in Market OS
+## 4. Review history in Flight Recorder
+
+Open **Flight Recorder** to inspect an archive that continues collecting after you close the site. A GitHub Actions workflow targets a collection every five minutes: it requests the complete public pool metadata set and samples quotes for up to 25 high-volume pools on each supported chain. The archive records changes in listing, tier, admin, Price Provider, pause and safeguards, and sampled quote availability or depth.
+
+The first collection establishes a baseline. Later passes create time-stamped observations. Search by pair or address, filter by category, or select a UTC date for an older daily file. Choose an observation to see its previous and observed value, source field, nearby changes, and a JSON export.
+
+Check **Last collection** and the status badge before interpreting any event. GitHub's scheduled runs are best effort and may be delayed; the browser fetches the current archive every minute but cannot create a missing background observation. Quote sampling is intentionally bounded and does not cover every pool. An event reports what the public API returned, not why it changed or whether an onchain swap succeeded. A pool missing from a complete pass is **unconfirmed**, not automatically removed. See [Metric's operating guide](https://docs.metric.xyz/run-a-pool/price-updates-and-monitoring) for the checks an operator should make.
+
+## 5. Test an idea in Market OS
 
 Open **Market OS** and enter a proposed pair, chain, pricing model, initial liquidity, target half-spread, quote staleness, bin width, StopLoss drawdown, and price shock. Set whether Price Provider and StopLoss are immutable and whether a withdrawal extension is enabled. Then select **Run preflight**.
 
@@ -52,17 +60,17 @@ A **6/6** result means this simplified baseline passed. It does not assign an of
 
 The **stale-quote exposure** card is an illustration: it uses the entered adverse price jump minus half-spread and assumes 50% of entered initial liquidity fills at a stale quote. It is not an exact Metric swap simulation, a prediction of loss, or financial advice.
 
-## 5. Use the robot guide
+## 6. Use the robot guide
 
 Select the robot in the hero to open the built-in help panel. Choose a topic to see what a feature does, how to use it, and its limits. The moving orbit indicators cycle through live indexed pool count, reported TVL, and 24-hour volume. Visitors who prefer reduced motion get a calmer experience.
 
-## 6. Understand live data
+## 7. Understand live data
 
 While the page is open, Metric Atlas requests fresh public metadata **every 60 seconds**. Returning to a stale tab triggers another request; **Refresh now** requests one immediately. New pools appear once Metric's public API includes them and a successful refresh completes. The LIVE indicator reflects the last successful update; an API failure is shown visibly.
 
-No wallet, API key, or personal account is required. The site is read-only, and Sentinel and Mission Control observations remain in your browser's local storage.
+No wallet, API key, or personal account is required. The site is read-only. Sentinel and Mission Control observations remain in your browser's local storage; Flight Recorder uses a separate public archive.
 
-## 7. Share feedback or contribute
+## 8. Share feedback or contribute
 
 The most useful feedback includes the page or feature, a pool address and chain when relevant, what you expected, what you observed, and a screenshot. Avoid sharing wallet secrets or private keys. You can open a GitHub issue or share feedback in Metric's Discord **builders-chat** channel. This is an independent community project, not an official Metric support channel.
 

@@ -4,13 +4,14 @@
 
 [Open the live site](https://metric-atlas-xyz.vercel.app/) · [Read the community guide](COMMUNITY_GUIDE.md) · [Download the team brief (PDF)](docs/Metric-Atlas-Team-Brief.pdf) · [View the community post on X](https://x.com/vlsss12/status/2121527705283826013)
 
-Metric Atlas is an independent, read-only community project. It brings four workflows into one interface:
+Metric Atlas is an independent, read-only community project. It brings five workflows into one interface:
 
 | Workflow | What it does |
 | --- | --- |
 | **Overview** | Explores all pools returned by Metric's paginated public metadata API, including the separate excluded-pool list. Shows reported TVL, 24-hour volume and swaps, pool status, and detailed metadata. |
 | **Sentinel** | Watches selected pools in the browser and records differences between successful refresh snapshots, including tier, admin, price provider, safeguards, pause state, and fee shares. |
 | **Mission Control** | Tracks reported provider issues, paused pools, and removals returned by Metric's separate excluded-pool query. Each observation includes evidence, timestamps, a next step, and a local acknowledgement control. |
+| **Flight Recorder** | Collects complete public pool metadata in the background, samples quotes for up to 25 high-volume pools per chain, and preserves time-stamped changes in a public archive. Search the timeline, inspect evidence, and export a JSON record. |
 | **Market OS** | Checks a proposed pool configuration against six documented baseline conditions and illustrates a stale-quote price-shock scenario. |
 
 ## What you can do
@@ -20,6 +21,7 @@ Metric Atlas is an independent, read-only community project. It brings four work
 - **Distinguish excluded pools.** A pool returned by Metric's separate `blacklistedOnly` query is labeled **Removed from Metric Pools**. This refers to the public listing, not deletion of its onchain contract.
 - **Monitor selected pools.** Add a watch from Overview or paste a pool address in Sentinel. Compare current metadata with the last successfully collected snapshot and review the local change log.
 - **Investigate pool conditions.** Mission Control derives signals from successful full-universe API refreshes, supports search and filters, and records when a reported condition is later resolved. A pool absent from a later response remains unconfirmed rather than being marked resolved.
+- **Reconstruct observed changes.** Flight Recorder compares complete metadata passes and sampled quotes, then records previous and observed values with source fields and UTC times. Search by pool, filter by category, select a UTC date, and export an evidence record. Its archive continues collecting when the site is closed.
 - **Refresh live data.** The open page requests fresh API data every 60 seconds, refreshes a stale tab when it becomes visible, and offers a manual refresh button. The header status reflects loading, success, or an error.
 - **Assess a market design.** Enter a pair, chain, pricing model, liquidity, half-spread, quote staleness, bin width, StopLoss drawdown, and price shock. Market OS reports six preflight checks and an illustrative stale-quote exposure.
 - **Get guided help.** An animated robot opens a topic-based guide for the site's features. Its orbiting indicators cycle through live pool count, reported TVL, and 24-hour volume. Motion respects reduced-motion preferences.
@@ -27,7 +29,9 @@ Metric Atlas is an independent, read-only community project. It brings four work
 ## Important boundaries
 
 - The site reads Metric's **public API** directly. It does not connect a wallet, request an API key, execute trades, create pools, or move funds.
-- Watch lists, snapshots, change history, and Mission Control observations are stored in **your browser**. Monitoring stops when the page is closed; history does not sync between devices and does not reconstruct earlier events. Acknowledgements are local to that browser.
+- Sentinel watch lists, snapshots, and Mission Control observations are stored in **your browser**. Their monitoring stops when the page is closed, and acknowledgements are local. Flight Recorder uses a separate, public, scheduled archive.
+- Flight Recorder targets a five-minute GitHub Actions schedule. Scheduled runs can be delayed or fail; the page displays the last successful collection time and status. Quote sampling covers selected high-volume pools, not every pool. Its first pass establishes a baseline; it does not reconstruct changes before that pass.
+- A metadata or quote change is an observation, not proof of cause or onchain execution. A pool absent from a complete pass is marked unconfirmed. No quote guarantees a swap will execute.
 - Mission Control reads reported metadata fields; it does not directly measure price-feed freshness, provide 24/7 alerting, or notify curators. An API failure preserves the previous observation and is shown as a failed check.
 - A watched address missing from both API lists is shown as **unconfirmed** rather than assumed removed.
 - Aggregate cards sum available values returned by the API. They are not independently audited protocol totals. Some pool metrics may be unavailable.
@@ -48,10 +52,14 @@ Open [http://localhost:8765](http://localhost:8765). A network connection is nee
 
 | File | Purpose |
 | --- | --- |
-| `index.html` | Accessible interface and four main views |
+| `index.html` | Accessible interface and five main views |
 | `styles.css` | Responsive dark and gold design, glass panels, motion, and reduced-motion support |
+| `flight.css` | Flight Recorder timeline and evidence panel design |
 | `app.js` | API pagination, rendering, watch snapshots, and Market OS checks |
 | `mission.js` | Evidence-based pool condition detection, reconciliation, and local history |
+| `flight.js` | Archive freshness, timeline filters, evidence detail, and JSON export |
+| `scripts/collect_flight.py` | Complete metadata pass, bounded quote sampling, and event archive generation |
+| `.github/workflows/flight-recorder.yml` | Best-effort scheduled collection and publication to `flight-data` |
 | `guide.js` | Topic-based product guide |
 | `mascot.js` | Animated guide and live stat interactions |
 | `mascot-*.webp` | Original guide character assets |
@@ -62,6 +70,8 @@ Open [http://localhost:8765](http://localhost:8765). A network connection is nee
 
 - [Metric public API](https://docs.metric.xyz/reference/api)
 - [Metric metadata endpoint](https://docs.metric.xyz/reference/api/metadata)
+- [Metric batch bid/ask endpoint](https://docs.metric.xyz/reference/api/retrieve-batch-bid-and-ask)
+- [GitHub Actions scheduled workflows](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#schedule)
 - [Metric pool tiers](https://docs.metric.xyz/use-metric/pool-tiers)
 - [Risks and safeguards](https://docs.metric.xyz/use-metric/risks-and-safeguards)
 - [Understanding LP returns](https://docs.metric.xyz/use-metric/provide-and-manage-liquidity/understanding-your-returns)
