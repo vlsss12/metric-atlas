@@ -21,6 +21,7 @@ from pathlib import Path
 API = "https://api.metric.xyz/public/v1/evm"
 CHAIN_IDS = {"ethereum": 1, "BSC": 56, "Robinhood": 4663}
 FIELDS = {
+    "newPool": ("Pool first observed", "Complete metadata response"),
     "tier": ("Risk tier", "classificationSummary.tierQualification"),
     "admin": ("Pool admin", "admin"),
     "provider": ("Price Provider", "priceProviderAddress"),
@@ -35,7 +36,6 @@ FIELDS = {
     "token0Depth": ("Token0 depth availability", "bid_ask/batch.totalToken0Available"),
     "token1Depth": ("Token1 depth availability", "bid_ask/batch.totalToken1Available"),
 }
-SEVERE = {"providerStatus", "pause", "quoteStatus", "bidAvailable", "askAvailable", "token0Depth", "token1Depth"}
 DOC_METADATA = "https://docs.metric.xyz/reference/api/metadata"
 DOC_QUOTES = "https://docs.metric.xyz/reference/api/retrieve-batch-bid-and-ask"
 
@@ -176,6 +176,10 @@ def make_event(key, pool, field, before, after, observed_at):
     label, source_field = FIELDS[field]
     raw = f"{key}|{field}|{compact(before)}|{compact(after)}|{observed_at}"
     event_id = hashlib.sha256(raw.encode()).hexdigest()[:20]
+    attention = ((field in ("providerStatus", "quoteStatus") and after not in ("healthy", "ok"))
+                 or (field in ("bidAvailable", "askAvailable", "token0Depth", "token1Depth") and after is False)
+                 or (field == "pause" and after not in (0, None))
+                 or (field == "excluded" and after is True))
     return {
         "id": event_id,
         "observedAt": observed_at,
@@ -189,7 +193,7 @@ def make_event(key, pool, field, before, after, observed_at):
         "after": compact(after),
         "sourceField": source_field,
         "sourceUrl": DOC_QUOTES if field in {"quoteStatus", "bidAvailable", "askAvailable", "token0Depth", "token1Depth"} else DOC_METADATA,
-        "severity": "attention" if (field in SEVERE and after in (False, "feed_down", "pool_refused")) or (field == "pause" and after not in (0, None)) else "change",
+        "severity": "attention" if attention else "change",
     }
 
 
@@ -209,6 +213,8 @@ def collect(previous, regular, excluded, quote_sample, quote_failures, observed_
             for field in ("tier", "admin", "provider", "providerStatus", "pause", "locked", "stopLoss", "excluded"):
                 if old.get(field) != pool.get(field):
                     events.append(make_event(key, pool, field, old.get(field), pool.get(field), observed_at))
+        elif previous.get("generatedAt"):
+            events.append(make_event(key, pool, "newPool", "not in previous complete pass", "excluded" if pool["excluded"] else "listed", observed_at))
     for key, quote in quote_sample.items():
         old = before_quotes.get(key)
         if old and key in current:
