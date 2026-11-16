@@ -8,6 +8,7 @@
   let selectedId = null;
   let visible = 12;
   let fetchSerial = 0;
+  let archiveRef = {sha:null,checkedAt:0};
   const escape = value => String(value ?? '—').replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
   const dateTime = value => { const date = new Date(value); return Number.isNaN(+date) ? 'Unknown time' : new Intl.DateTimeFormat('en-GB',{dateStyle:'medium',timeStyle:'short',timeZone:'UTC'}).format(date) + ' UTC'; };
   const elapsed = value => { const minutes = Math.max(0,Math.floor((Date.now()-new Date(value).getTime())/60000)); return !Number.isFinite(minutes) ? 'Unknown' : minutes < 1 ? 'Just now' : minutes < 60 ? `${minutes}m ago` : minutes < 1440 ? `${Math.floor(minutes/60)}h ${minutes%60}m ago` : `${Math.floor(minutes/1440)}d ago`; };
@@ -19,8 +20,23 @@
     return 'A public metadata field changed between successful collections. Review the pool and neighboring observations.';
   };
   function setBadge(state,text) { els.flightBadge.dataset.state=state; els.flightBadge.textContent=text; }
+  async function resolveRef() {
+    if(archiveRef.sha && Date.now()-archiveRef.checkedAt<120000) return archiveRef.sha;
+    try {
+      const response=await fetch(`https://api.github.com/repos/vlsss12/metric-atlas/git/ref/heads/flight-data?t=${Date.now()}`,{cache:'no-store',headers:{Accept:'application/vnd.github+json'}});
+      if(!response.ok) throw new Error(`Archive ref ${response.status}`);
+      const payload=await response.json();
+      if(!/^[0-9a-f]{40}$/.test(payload?.object?.sha||'')) throw new Error('Invalid archive ref');
+      archiveRef={sha:payload.object.sha,checkedAt:Date.now()};
+      return archiveRef.sha;
+    } catch(error) {
+      if(archiveRef.sha) return archiveRef.sha;
+      throw error;
+    }
+  }
   async function getJson(path) {
-    const response=await fetch(`${BASE}/${path}?t=${Date.now()}`,{cache:'no-store'});
+    const sha=await resolveRef();
+    const response=await fetch(`${BASE.replace('/flight-data/','/'+sha+'/')}/${path}`,{cache:'no-store'});
     if(!response.ok) throw new Error(`Archive request ${response.status}`);
     return response.json();
   }
