@@ -32,7 +32,7 @@
       return archiveRef.sha;
     } catch(error) {
       if(archiveRef.sha) return archiveRef.sha;
-      throw error;
+      return 'flight-data';
     }
   }
   async function getJson(path) {
