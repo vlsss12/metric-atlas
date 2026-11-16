@@ -15,6 +15,7 @@
   const category = event => ['quoteStatus','bidAvailable','askAvailable','token0Depth','token1Depth'].includes(event.category) ? 'quote' : ['admin','provider','providerStatus','pause','locked','stopLoss'].includes(event.category) ? 'controls' : 'listing';
   const note = event => {
     if (event.severity === 'unconfirmed') return 'The pool was absent from a complete metadata pass. Verify its status with Metric; absence alone does not prove removal.';
+    if (event.category === 'newPool') return 'This pool appeared in a complete metadata pass after being absent from the preceding pass. First observation does not prove the contract was deployed at this time.';
     if (event.category === 'excluded') return event.after === 'yes' ? 'The pool appeared in Metric’s excluded-pool response. Check the official interface before acting.' : 'The pool no longer appeared in the excluded-pool response at this collection.';
     if (category(event) === 'quote') return 'A sampled public quote changed. This does not establish onchain execution or the reason for the change.';
     return 'A public metadata field changed between successful collections. Review the pool and neighboring observations.';
@@ -51,7 +52,7 @@
       els.flightQuotes.textContent=Number(payload.coverage.quoteSampled||0).toLocaleString();
       els.flightEvents.textContent=payload.events.length.toLocaleString();
       els.flightUpdated.textContent=payload.generatedAt ? new Intl.DateTimeFormat('en-GB',{hour:'2-digit',minute:'2-digit',timeZone:'UTC'}).format(new Date(payload.generatedAt))+' UTC' : 'Pending';
-      els.flightFreshness.textContent=payload.generatedAt ? `${dateTime(payload.generatedAt)} · ${elapsed(payload.generatedAt)}` : 'Waiting for first collection';
+      els.flightFreshness.textContent=payload.generatedAt ? `${dateTime(payload.generatedAt)} · ${elapsed(payload.generatedAt)}${payload.coverage.quoteErrors?.length?' · quote sample partial':''}` : 'Waiting for first collection';
       const age=Date.now()-new Date(payload.generatedAt).getTime();
       setBadge(!payload.generatedAt?'pending':age>15*60000?'delayed':'current',!payload.generatedAt?'AWAITING FIRST PASS':age>15*60000?'ARCHIVE DELAYED':'ARCHIVE CURRENT');
       if(!els.flightDate.value) { activeEvents=payload.events; render(); }
@@ -84,7 +85,7 @@
       renderDetail(null,rows);
       return;
     }
-    els.flightTimeline.innerHTML=rows.slice(0,visible).map(event=>`<button class="flight-event ${event.id===selectedId?'selected':''}" type="button" data-flight-id="${escape(event.id)}"><span class="flight-event-rail"><i></i></span><span class="flight-event-body"><span class="flight-event-meta">${escape(dateTime(event.observedAt))}<span class="flight-event-tag ${escape(event.severity)}">${escape(event.severity==='attention'?'CHECK':event.severity==='unconfirmed'?'VERIFY':'CHANGE')}</span></span><strong>${escape(event.title)}</strong><span class="flight-event-pool">${escape(event.pair)} <span>· ${escape(event.chain)}</span></span><span class="flight-event-values">${escape(event.before)} <b>→</b> ${escape(event.after)}</span></span><span class="flight-event-arrow" aria-hidden="true">↗</span></button>`).join('');
+    els.flightTimeline.innerHTML=rows.slice(0,visible).map(event=>`<button class="flight-event ${event.id===selectedId?'selected':''}" type="button" data-flight-id="${escape(event.id)}"><span class="flight-event-rail"><i></i></span><span class="flight-event-body"><span class="flight-event-meta">${escape(dateTime(event.observedAt))}<span class="flight-event-tag ${escape(event.severity)}">${escape(event.severity==='attention'?'CHECK':event.severity==='unconfirmed'?'VERIFY':'CHANGE')}</span></span><strong>${escape(event.title)}</strong><span class="flight-event-pool">${escape(event.pair)} <span>· ${escape(event.chain)} · ${escape(event.address ? `${event.address.slice(0,6)}…${event.address.slice(-4)}` : 'unknown address')}</span></span><span class="flight-event-values">${escape(event.before)} <b>→</b> ${escape(event.after)}</span></span><span class="flight-event-arrow" aria-hidden="true">↗</span></button>`).join('');
     els.flightMore.hidden=rows.length<=visible;
     els.flightMore.textContent=`Show more observations ↓  ${Math.min(visible,rows.length)} / ${rows.length}`;
     const chosen=rows.find(item=>item.id===selectedId)||rows[0]; selectedId=chosen.id;
