@@ -2,7 +2,7 @@
 (() => {
   const BASE = 'https://raw.githubusercontent.com/vlsss12/metric-atlas/flight-data/data';
   const $ = id => document.getElementById(id);
-  const els = Object.fromEntries(['flightBadge','flightPools','flightQuotes','flightEvents','flightEventsNote','flightUpdated','flightFreshness','flightLiveUpdated','flightLiveFreshness','flightCount','flightSearch','flightFilter','flightDate','flightTimeline','flightMore','flightDetailIndex','flightDetailBody'].map(id => [id, $(id)]));
+  const els = Object.fromEntries(['flightPools','flightQuotes','flightEvents','flightEventsNote','flightUpdated','flightFreshness','flightLiveUpdated','flightLiveFreshness','flightCount','flightSearch','flightFilter','flightDate','flightTimeline','flightMore','flightDetailIndex','flightDetailBody'].map(id => [id, $(id)]));
   let archive = null;
   let activeEvents = [];
   let selectedId = null;
@@ -75,7 +75,6 @@
     if (category(event) === 'quote') return 'A sampled public quote changed. This does not establish onchain execution or the reason for the change.';
     return 'A public metadata field changed between successful collections. Review the pool and neighboring observations.';
   };
-  function setBadge(state,text) { els.flightBadge.dataset.state=state; els.flightBadge.textContent=text; }
   async function resolveRef() {
     if(archiveRef.sha && Date.now()-archiveRef.checkedAt<120000) return archiveRef.sha;
     try {
@@ -107,14 +106,12 @@
       els.flightQuotes.textContent=Number(payload.coverage.quoteSampled||0).toLocaleString();
       showEventCount();
       els.flightUpdated.textContent=payload.generatedAt ? new Intl.DateTimeFormat('en-GB',{hour:'2-digit',minute:'2-digit',timeZone:'UTC'}).format(new Date(payload.generatedAt))+' UTC' : 'Pending';
-      els.flightFreshness.textContent=payload.generatedAt ? `${dateTime(payload.generatedAt)} · ${elapsed(payload.generatedAt)}${payload.coverage.quoteErrors?.length?' · quote sample partial':''}` : 'Waiting for first collection';
       const age=Date.now()-new Date(payload.generatedAt).getTime();
-      setBadge(!payload.generatedAt?'pending':age>15*60000?'delayed':'current',!payload.generatedAt?'AWAITING FIRST PASS':age>15*60000?'ARCHIVE DELAYED':'ARCHIVE CURRENT');
+      els.flightFreshness.textContent=payload.generatedAt ? `${dateTime(payload.generatedAt)} · ${elapsed(payload.generatedAt)}${age>15*60000?' · Delayed':''}${payload.coverage.quoteErrors?.length?' · quote sample partial':''}` : 'Waiting for first collection';
       if(!els.flightDate.value) { activeEvents=currentEvents(); render(); }
       else await updateDaily();
     } catch (error) {
       if(serial!==fetchSerial) return;
-      setBadge('error','ARCHIVE UNAVAILABLE');
       els.flightFreshness.textContent=archive?.generatedAt?`Last available: ${dateTime(archive.generatedAt)}`:'No successful archive loaded';
       if(!archive) { els.flightCount.textContent='The historical archive could not be loaded.'; els.flightTimeline.innerHTML='<div class="flight-empty">The archive is temporarily unavailable. Try again shortly.</div>'; }
     }
