@@ -4,6 +4,11 @@ on:
   schedule:
     # GitHub schedules are best effort and can be delayed.
     - cron: '2-59/5 * * * *'
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/flight-recorder.yml'
+      - 'scripts/collect_flight.py'
   workflow_dispatch:
 
 permissions:
