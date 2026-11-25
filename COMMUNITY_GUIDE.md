@@ -52,11 +52,11 @@ Compare **Live API check** with **Archive collection** before interpreting an ev
 
 ## 5. Test an idea in Market OS
 
-Open **Market OS** and enter a proposed pair, chain, pricing model, initial liquidity, target half-spread, quote staleness, bin width, StopLoss drawdown, and price shock. Set whether Price Provider and StopLoss are immutable and whether a withdrawal extension is enabled. Then select **Run preflight**.
+Open **Market OS** and enter a proposed pair, chain, pricing model, initial liquidity, target half-spread, quote staleness, bin width, StopLoss drawdown, and price shock. Choose the price reference source. Set whether Price Provider and StopLoss are immutable and whether a withdrawal extension is enabled. Then select **Run preflight**.
 
-The report evaluates six conditions derived from Metric's published public-pool guidance: a typical aggregator liquidity threshold, immutable Price Provider and StopLoss settings, bin width of at most 1%, StopLoss drawdown of at most 15%, no withdrawal extension, and anchored pricing with quote freshness of at most 15 seconds. See [pool tier rules](https://docs.metric.xyz/use-metric/pool-tiers) and [operator setup](https://docs.metric.xyz/run-a-pool/getting-started) for the full requirements.
+The report evaluates six conditions derived from Metric's published public-pool guidance: a typical aggregator liquidity threshold, immutable Price Provider and StopLoss settings, bin width of at most 1%, StopLoss drawdown of at most 15%, no withdrawal extension, and anchored pricing with quote freshness of at most 15 seconds. See [pool tier rules](https://docs.metric.xyz/use-metric/pool-tiers) and [operator setup](https://docs.metric.xyz/run-a-pool/getting-started) for the full requirements. The seventh check reflects Metric’s new price-reference policy and uses the source you select; it cannot verify the real feed dependency.
 
-A **6/6** result means this simplified baseline passed. It does not assign an official tier. Curator verification, feed mapping, initialized safeguards, and live execution still need separate review.
+A **7/7** result means this simplified baseline passed. It does not assign an official tier. Curator verification, feed mapping, initialized safeguards, and live execution still need separate review.
 
 The **stale-quote exposure** card is an illustration: it uses the entered adverse price jump minus half-spread and assumes 50% of entered initial liquidity fills at a stale quote. It is not an exact Metric swap simulation, a prediction of loss, or financial advice.
 
@@ -75,3 +75,7 @@ No wallet, API key, or personal account is required. The site is read-only. Sent
 The most useful feedback includes the page or feature, a pool address and chain when relevant, what you expected, what you observed, and a screenshot. Avoid sharing wallet secrets or private keys. You can open a GitHub issue or share feedback in Metric's Discord **builders-chat** channel. This is an independent community project, not an official Metric support channel.
 
 For a visual introduction, [download the team brief](docs/Metric-Atlas-Team-Brief.pdf). The [community post on X](https://x.com/vlsss12/status/2121527705283826013) provides a short public overview.
+
+## Metric pool price-reference policy
+
+Metric announced a policy effective 26 November 2026 at 17:00; its Discord announcement did not specify a time zone. Pool operators must not reference other Metric pools or another operator’s custom price feed. Standard public oracles such as Pyth and Chainlink remain allowed. A violating pool can be delisted from Metric’s API and routing, while withdrawals are unaffected. In Market OS, choose the proposed **Price reference source** to run a self-reported policy check. Atlas cannot inspect the full dependency graph from the public metadata API. If a watched pool disappears from both API responses, Atlas shows its status and cause as unconfirmed, rather than assuming a policy violation.

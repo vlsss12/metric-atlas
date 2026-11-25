@@ -12,7 +12,7 @@ Metric Atlas is an independent, read-only community project. It brings five work
 | **Sentinel** | Watches selected pools in the browser and records differences between successful refresh snapshots, including tier, admin, price provider, safeguards, pause state, and fee shares. |
 | **Mission Control** | Tracks reported provider issues, paused pools, and removals returned by Metric's separate excluded-pool query. Each observation includes evidence, timestamps, a next step, and a local acknowledgement control. |
 | **Flight Recorder** | Shows live metadata changes from successful one-minute checks while the tab is open, alongside a separate public archive from a background collector. Search the timeline, inspect evidence, and export a JSON record. |
-| **Market OS** | Checks a proposed pool configuration against six documented baseline conditions and illustrates a stale-quote price-shock scenario. |
+| **Market OS** | Checks a proposed pool configuration against six documented baseline conditions plus Metric’s new price-reference policy, and illustrates a stale-quote price-shock scenario. |
 
 ## What you can do
 
@@ -23,7 +23,7 @@ Metric Atlas is an independent, read-only community project. It brings five work
 - **Investigate pool conditions.** Mission Control derives signals from successful full-universe API refreshes, supports search and filters, and records when a reported condition is later resolved. A pool absent from a later response remains unconfirmed rather than being marked resolved.
 - **Reconstruct observed changes.** Flight Recorder compares live metadata checks every minute while the tab is open. A separate collector records background metadata and bounded quote samples in a public archive. Search by pool, filter by category, select a UTC archive date, and export an evidence record. Separate timestamps identify the live check and archive collection.
 - **Refresh live data.** The open page requests fresh API data every 60 seconds, refreshes a stale tab when it becomes visible, and offers a manual refresh button. The header status reflects loading, success, or an error.
-- **Assess a market design.** Enter a pair, chain, pricing model, liquidity, half-spread, quote staleness, bin width, StopLoss drawdown, and price shock. Market OS reports six preflight checks and an illustrative stale-quote exposure.
+- **Assess a market design.** Enter a pair, chain, pricing model, liquidity, half-spread, quote staleness, bin width, StopLoss drawdown, and price shock. Market OS reports seven preflight checks, including the new price-reference restriction, and an illustrative stale-quote exposure.
 - **Get guided help.** An animated robot opens a topic-based guide for the site's features. Its orbiting indicators cycle through live pool count, reported TVL, and 24-hour volume. Motion respects reduced-motion preferences.
 
 ## Important boundaries
@@ -78,3 +78,7 @@ Open [http://localhost:8765](http://localhost:8765). A network connection is nee
 - [Running a pool](https://docs.metric.xyz/run-a-pool/getting-started)
 
 Metric Atlas is not affiliated with or endorsed by Metric. Metric names, data, and links belong to their respective owners.
+
+## Pool price-reference policy (effective 26 November 2026)
+
+Metric announced that, starting 26 November 2026 at 17:00 (time zone unspecified in the announcement), pool operators must not reference other Metric pools or other operators’ custom price feeds. Standard public oracles such as Pyth and Chainlink are unaffected. Metric says non-compliant pools will be delisted from its API and routing, while withdrawals remain possible. Market OS now asks for the proposed reference source and flags the two prohibited dependencies. This is a self-reported planning check, not verification of an actual feed graph. A pool absent from both API responses remains unconfirmed; Atlas never attributes the cause to this policy without direct evidence.
